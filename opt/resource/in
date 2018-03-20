@@ -1,0 +1,51 @@
+#! /usr/bin/env python3
+
+import json
+import os
+import sys
+import collections
+
+from common import get_payload
+
+
+def get(dst):
+    print("Using dir {}".format(dst), file=sys.stderr)
+    payload = get_payload()
+    version = get_version(payload)
+
+    with open(os.path.join(dst, 'version'), 'w') as fp:
+        fp.write(version)
+
+    print(json.dumps({
+        'version': {'version': version},
+        'metadata': []
+    }))
+
+
+def get_version(payload):
+    try:
+        version = payload['version']['version']
+    except TypeError:
+        version = None
+    return version
+
+def convert(data):
+    if isinstance(data, str):
+        return str(data)
+    elif isinstance(data, collections.Mapping):
+        return dict(map(convert, data.items()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(convert, data))
+    else:
+        return data
+
+j = json.loads("".join(sys.stdin.readlines()))
+j = convert(j)
+
+version = j['version']
+
+result = {
+    "version": version
+}
+
+sys.stdout.write(json.dumps(result))
