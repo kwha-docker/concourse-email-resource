@@ -99,8 +99,8 @@ def get_subject(src, payload, template_vars):
     try:
         subject = Template(subject).render(template_vars)
     except TemplateSyntaxError as err:
-        print(str(err), file=sys.stderr)
-        print("Unable to render template vars in subject")
+        print("{}: {}".format("TemplateSyntaxError", str(err)), file=sys.stderr)
+        print("Unable to render template vars in message", file=sys.stderr)
         print("Template vars: {}".format(template_vars), file=sys.stderr)
     
     return subject
@@ -120,8 +120,8 @@ def get_message(src, payload, template_vars):
     try:
         message = Template(message).render(template_vars)
     except TemplateSyntaxError as err:
-        print(str(err), file=sys.stderr)
-        print("Unable to render template vars in message")
+        print("{}: {}".format("TemplateSyntaxError", str(err)), file=sys.stderr)
+        print("Unable to render template vars in message", file=sys.stderr)
         print("Template vars: {}".format(template_vars), file=sys.stderr)
 
     if mime_subtype == 'html' and inline:
