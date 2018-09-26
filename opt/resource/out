@@ -100,13 +100,20 @@ def get_subject(src, payload, template_vars):
 def get_message(src, payload, template_vars):
     message = get_value_from_payload(payload, 'params', 'body_text', optional=True)
     if not message:
+        print("Using `body` params", file=sys.stderr)
         fname = get_value_from_payload(payload, 'params', 'body')
         with open(os.path.join(src, fname)) as fp:
             message = fp.read()
 
     inline = get_value_from_payload(payload, 'params', 'inline_css', default=True, optional=True)
     mime_subtype = get_mime_subtype(payload)
-    message = Template(message).render(template_vars)
+
+    try:
+        message = Template(message).render(template_vars)
+    except Exception e:
+        print(str(e), file=sys.stderr)
+        print("Message: {}".format(message), file=sys.stderr)
+        print("Template vars: {}".format(template_vars), file=sys.stderr)
 
     if mime_subtype == 'html' and inline:
         message = inline_css(message)
