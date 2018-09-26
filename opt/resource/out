@@ -16,6 +16,7 @@ import time
 
 from inlinestyler.utils import inline_css
 from jinja2 import Template
+from jinja2.exceptions import TemplateSyntaxError
 import common
 from common import get_payload
 
@@ -94,7 +95,15 @@ def get_subject(src, payload, template_vars):
         fname = get_value_from_payload(payload, 'params', 'subject')
         with open(os.path.join(src, fname)) as fp:
             subject = fp.read()
-    return Template(subject).render(template_vars)
+
+    try:
+        subject = Template(subject).render(template_vars)
+    except TemplateSyntaxError as err:
+        print(str(err), file=sys.stderr)
+        print("Unable to render template vars in subject")
+        print("Template vars: {}".format(template_vars), file=sys.stderr)
+    
+    return subject
 
 
 def get_message(src, payload, template_vars):
@@ -110,14 +119,14 @@ def get_message(src, payload, template_vars):
 
     try:
         message = Template(message).render(template_vars)
-    except Exception as err:
+    except TemplateSyntaxError as err:
         print(str(err), file=sys.stderr)
-        print("Message: {}".format(message), file=sys.stderr)
+        print("Unable to render template vars in message")
         print("Template vars: {}".format(template_vars), file=sys.stderr)
-        raise
 
     if mime_subtype == 'html' and inline:
         message = inline_css(message)
+    
     return message
 
 def get_template_vars(src, payload):
