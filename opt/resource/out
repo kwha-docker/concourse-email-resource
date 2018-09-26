@@ -114,6 +114,7 @@ def get_message(src, payload, template_vars):
         print(str(e), file=sys.stderr)
         print("Message: {}".format(message), file=sys.stderr)
         print("Template vars: {}".format(template_vars), file=sys.stderr)
+        raise
 
     if mime_subtype == 'html' and inline:
         message = inline_css(message)
